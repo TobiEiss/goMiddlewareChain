@@ -2,7 +2,7 @@
 
 This is a express.js like middleware chain for [julienschmidt's httprouter](github.com/julienschmidt/httprouter)
 
-Stay tuned for documentation
+Stay tuned for more documentation
 
 ## Getting started
 
@@ -53,6 +53,6 @@ You will get the following:
 Isn't it cool?
 
 ## TODOS
-[ ] documentation
-[ ] tests
+[ ] documentation   
+[ ] tests   
 [ ] travis
