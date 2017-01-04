@@ -1,6 +1,6 @@
 # goMiddlewareChain
 
-This is a express.js like middleware chain for [julienschmidt's httprouter](github.com/julienschmidt/httprouter)
+This is a express.js like middleware chain for [julienschmidt's httprouter](https://github.com/julienschmidt/httprouter)
 
 Stay tuned for more documentation
 
