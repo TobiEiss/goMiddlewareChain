@@ -1,8 +1,8 @@
 # goMiddlewareChain
 
-This is a express.js like middleware chain for [julienschmidt's httprouter](https://github.com/julienschmidt/httprouter)
+This is a express.js-like-middleware-chain for [julienschmidt's httprouter](https://github.com/julienschmidt/httprouter)
 
-Stay tuned for more documentation
+You can write your own middleware, and chain this to a lot of other middlewares (logging, auth,...).
 
 ## Getting started
 
@@ -11,7 +11,7 @@ Stay tuned for more documentation
 
 ### Your first API
 
-Here a simple example with a simple JSONResponseHandler.
+Here a simple example with a simple Ping-Pong-Hanlder chained with a JSONResponseHandler (from templates).
 
 ```golang
 package main
@@ -52,7 +52,12 @@ You will get the following:
 ```
 Isn't it cool?
 
+## handler from tamplates
+- [logHandler](loghandler) is an easy handler to log all accesses
+- jsonResponseHandler try to transform your response to valid json
+
+You need more handler? Just let me now this and write me.
+
 ## TODOS
-[ ] documentation   
 [ ] tests   
 [ ] travis
