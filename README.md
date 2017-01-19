@@ -1,4 +1,4 @@
-# goMiddlewareChain
+# goMiddlewareChain [![Build Status](https://travis-ci.org/TobiEiss/goMiddlewareChain.svg?branch=master)](https://travis-ci.org/TobiEiss/goMiddlewareChain)
 
 This is an express.js-like-middleware-chain for [julienschmidt's httprouter](https://github.com/julienschmidt/httprouter)
 
