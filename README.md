@@ -11,7 +11,7 @@ You can write your own middleware, and chain this to a lot of other middlewares 
 
 ### Your first API
 
-Here a simple example with a simple Ping-Pong-Hanlder chained with a JSONResponseHandler (from templates).
+Here a simple example with a simple Ping-Pong-Handler chained with a JSONResponseHandler (from templates).
 
 ```golang
 package main
