@@ -53,11 +53,7 @@ You will get the following:
 Isn't it cool?
 
 ## handler from tamplates
-- [logHandler](loghandler) is an easy handler to log all accesses
-- jsonResponseHandler try to transform your response to valid json
+- [logHandler](https://github.com/TobiEiss/goMiddlewareChain/blob/master/templates/logHandler.go) is an easy handler to log all accesses
+- [jsonResponseHandler](https://github.com/TobiEiss/goMiddlewareChain/blob/master/templates/jsonResponseHandler.go) try to transform your response to valid json
 
-You need more handler? Just let me now this and write me.
-
-## TODOS
-[ ] tests   
-[ ] travis
+You need more handler? Just let us now this.
