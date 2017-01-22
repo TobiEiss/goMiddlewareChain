@@ -35,6 +35,9 @@ func RestrictedRequestChainHandler(restrictHandler RestrictHandler, responseHand
 			for _, handler := range handlers {
 				handler(&payload, request, params)
 			}
+		} else if payload.Status.Code == 0 {
+			payload.Status.Code = http.StatusUnauthorized
+			payload.Status.Message = "failed by passing restrictHandler"
 		}
 
 		// pass ResponseHandler
