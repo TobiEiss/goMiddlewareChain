@@ -99,7 +99,7 @@ Now run `curl --header "X-User: HomerSimpson" localhost:8080/api/v0/ping` in you
 }
 ```
 
-If you run `curl --header "X-User: HomerSimpson" localhost:8080/api/v0/ping`, you get:
+If you run `curl --header "X-User: BartSimpson" localhost:8080/api/v0/ping`, you get:
 ```json
 {
 	"msg":"failed by passing restrictHandler",
