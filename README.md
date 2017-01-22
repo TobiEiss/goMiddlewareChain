@@ -107,7 +107,7 @@ If you run `curl --header "X-User: BartSimpson" localhost:8080/api/v0/ping`, you
 }
 ```
 
-## handler from tamplates
+## handler from templates
 - [logHandler](https://github.com/TobiEiss/goMiddlewareChain/blob/master/templates/logHandler.go) is an easy handler to log all accesses
 - [jsonResponseHandler](https://github.com/TobiEiss/goMiddlewareChain/blob/master/templates/jsonResponseHandler.go) try to transform your response to valid json
 
