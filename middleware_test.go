@@ -9,40 +9,60 @@ import (
 
 	"encoding/json"
 
+	"reflect"
+
 	"github.com/julienschmidt/httprouter"
 )
+
+// response handler which write response to writer
+var responseHandler = func(response *Response, writer http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+	bodyMap := map[string]interface{}{"data": response.Data}
+	bodyJSON, _ := json.Marshal(bodyMap)
+	fmt.Fprintf(writer, "%s", bodyJSON)
+}
 
 func TestMain(t *testing.T) {
 
 	var tests = []struct {
-		handler      Handler
-		expectedData interface{}
+		handler         Handler
+		restrictHandler RestrictHandler
+		expectedData    interface{}
 	}{
 		// Test 0:
+		// Check if chain works
 		{
 			handler: func(response *Response, _ *http.Request, _ httprouter.Params) {
 				response.Data = "data"
 			},
 			expectedData: "data",
 		},
-	}
-
-	// response handler which write response to writer
-	responseHandler := func(response *Response, writer http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-		bodyMap := map[string]interface{}{"data": response.Data}
-		bodyJSON, _ := json.Marshal(bodyMap)
-		fmt.Fprintf(writer, "%s", bodyJSON)
+		// Test 1:
+		// Check if restrictedChain works with restriction true
+		{
+			handler: func(response *Response, _ *http.Request, _ httprouter.Params) {
+				response.Data = "data"
+			},
+			restrictHandler: func(response *Response, request *http.Request, _ httprouter.Params) bool {
+				return true
+			},
+			expectedData: "data",
+		},
 	}
 
 	// run all tests
 	for index, test := range tests {
 		// recorder and request to simulate test
 		recorder := httptest.NewRecorder()
-		request, err := http.NewRequest("GET", "", nil)
+		request, err := http.NewRequest("POST", "", nil)
 
 		// build chain
-		handlerChain := RequestChainHandler(responseHandler, test.handler)
-		handlerChain(recorder, request, nil)
+		if reflect.ValueOf(test.restrictHandler).IsNil() {
+			handlerChain := RequestChainHandler(responseHandler, test.handler)
+			handlerChain(recorder, request, nil)
+		} else {
+			restrictedHandleChain := RestrictedRequestChainHandler(test.restrictHandler, responseHandler, test.handler)
+			restrictedHandleChain(recorder, request, nil)
+		}
 
 		// check result
 		var responseBody map[string]interface{}
