@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/TobiEiss/goMiddlewareChain"
-	"github.com/TobiEiss/httprouter"
+	"github.com/julienschmidt/httprouter"
 )
 
 // Ping route should just respond with pong
