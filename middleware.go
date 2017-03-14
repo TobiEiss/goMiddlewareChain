@@ -1,6 +1,7 @@
 package goMiddlewareChain
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -26,3 +27,6 @@ type RestrictHandler func(*Response, *http.Request, httprouter.Params) bool
 
 // ResponseHandler required for every Endpoint
 type ResponseHandler func(*Response, http.ResponseWriter, *http.Request, httprouter.Params)
+
+// ContextHandler a handler with the go-lang-context
+type ContextHandler func(context.Context, *Response, *http.Request, httprouter.Params) context.Context

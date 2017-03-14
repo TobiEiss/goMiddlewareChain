@@ -1,6 +1,7 @@
 package goMiddlewareChain
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -41,6 +42,24 @@ func RestrictedRequestChainHandler(restrictHandler RestrictHandler, responseHand
 		}
 
 		// pass ResponseHandler
+		responseHandler(&payload, writer, request, params)
+	})
+}
+
+// RequestChainContextHandler chains all handler
+func RequestChainContextHandler(responseHandler ResponseHandler, handlers ...ContextHandler) httprouter.Handle {
+	return httprouter.Handle(func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+		payload := Response{}
+		rootContext := context.Background()
+
+		// iterate all handlers
+		var runningContext context.Context
+		runningContext = rootContext
+		for _, handler := range handlers {
+			runningContext = handler(runningContext, &payload, request, params)
+		}
+
+		// pass responseHandler
 		responseHandler(&payload, writer, request, params)
 	})
 }
