@@ -43,6 +43,12 @@ func RequestChainContextHandler(responseHandler ResponseHandler, handlers ...Con
 // RestrictedRequestChainHandler need a RestrictHandler.
 // A RestrictHandler returns bool if call is allowed.
 func RestrictedRequestChainHandler(restrictHandler RestrictHandler, responseHandler ResponseHandler, handlers ...Handler) httprouter.Handle {
+	return RestrictedRequestChainHandlerWithResponseCheck(false, restrictHandler, responseHandler, handlers...)
+}
+
+// RestrictedRequestChainHandlerWithResponseCheck need a RestrictHandler.
+// If checkResponseOfEveryHandler is true, handler check every response.
+func RestrictedRequestChainHandlerWithResponseCheck(checkResponseOfEveryHandler bool, restrictHandler RestrictHandler, responseHandler ResponseHandler, handlers ...Handler) httprouter.Handle {
 	return httprouter.Handle(func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		payload := Response{}
 
@@ -53,6 +59,9 @@ func RestrictedRequestChainHandler(restrictHandler RestrictHandler, responseHand
 			// iterate all handlers
 			for _, handler := range handlers {
 				handler(&payload, request, params)
+				if checkResponseOfEveryHandler && (payload.Status.Code != http.StatusOK && payload.Status.Code != 0) {
+					break
+				}
 			}
 		} else if payload.Status.Code == 0 {
 			payload.Status.Code = http.StatusUnauthorized
@@ -67,6 +76,12 @@ func RestrictedRequestChainHandler(restrictHandler RestrictHandler, responseHand
 // RestrictedRequestChainContextHandler need a RestrictHandler.
 // A RestrictHandler returns bool if call is allowed.
 func RestrictedRequestChainContextHandler(restrictHandler RestrictContextHandler, responseHandler ResponseHandler, handlers ...ContextHandler) httprouter.Handle {
+	return RestrictedRequestChainContextHandlerWithResponseCheck(false, restrictHandler, responseHandler, handlers...)
+}
+
+// RestrictedRequestChainContextHandlerWithResponseCheck exec all handlers
+// If checkResponseOfEveryHandler is true, handler check every response.
+func RestrictedRequestChainContextHandlerWithResponseCheck(checkResponseOfEveryHandler bool, restrictHandler RestrictContextHandler, responseHandler ResponseHandler, handlers ...ContextHandler) httprouter.Handle {
 	return httprouter.Handle(func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		payload := Response{}
 		rootContext := context.Background()
@@ -80,6 +95,9 @@ func RestrictedRequestChainContextHandler(restrictHandler RestrictContextHandler
 			runningContext = rootContext
 			for _, handler := range handlers {
 				runningContext = handler(runningContext, &payload, request, params)
+				if checkResponseOfEveryHandler && (payload.Status.Code != http.StatusOK && payload.Status.Code != 0) {
+					break
+				}
 			}
 		} else if payload.Status.Code == 0 {
 			payload.Status.Code = http.StatusUnauthorized

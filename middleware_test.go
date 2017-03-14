@@ -17,7 +17,7 @@ import (
 
 // response handler which write response to writer
 var responseHandler = func(response *Response, writer http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-	bodyMap := map[string]interface{}{"data": response.Data}
+	bodyMap := map[string]interface{}{"data": response.Data, "status": response.Status.Code}
 	bodyJSON, _ := json.Marshal(bodyMap)
 	fmt.Fprintf(writer, "%s", bodyJSON)
 }
@@ -118,6 +118,83 @@ func TestContextHandler(t *testing.T) {
 		json.Unmarshal([]byte(recorder.Body.String()), &responseBody)
 		if err != nil || responseBody["data"] != test.expectedData {
 			t.Errorf("Test %v failed: expected data is not equals response.data; expected: %v; response: %v", index, test.expectedData, responseBody["data"])
+		}
+	}
+}
+
+func TestContextFailHandler(t *testing.T) {
+	var tests = []struct {
+		handler                     []ContextHandler
+		restrictHandler             RestrictContextHandler
+		expectedStatus              int
+		checkResponseOfEveryHandler bool
+	}{
+		// Test 0:
+		// Check expected code is 500
+		{
+			handler: []ContextHandler{
+				func(ctx context.Context, response *Response, _ *http.Request, _ httprouter.Params) context.Context {
+					response.Status.Code = http.StatusOK
+					return ctx
+				},
+				func(ctx context.Context, response *Response, _ *http.Request, _ httprouter.Params) context.Context {
+					response.Status.Code = http.StatusInternalServerError
+					return ctx
+				},
+				// This handler should not run!
+				func(ctx context.Context, response *Response, _ *http.Request, _ httprouter.Params) context.Context {
+					response.Status.Code = http.StatusOK
+					return ctx
+				},
+			},
+			restrictHandler: func(ctx context.Context, _ *Response, _ *http.Request, _ httprouter.Params) (context.Context, bool) {
+				return ctx, true
+			},
+			expectedStatus:              500,
+			checkResponseOfEveryHandler: true,
+		},
+
+		// Test 1:
+		// Check expected code == 200
+		{
+			handler: []ContextHandler{
+				func(ctx context.Context, response *Response, _ *http.Request, _ httprouter.Params) context.Context {
+					response.Status.Code = http.StatusOK
+					return ctx
+				},
+				func(ctx context.Context, response *Response, _ *http.Request, _ httprouter.Params) context.Context {
+					response.Status.Code = http.StatusInternalServerError
+					return ctx
+				},
+				// This handler should not run!
+				func(ctx context.Context, response *Response, _ *http.Request, _ httprouter.Params) context.Context {
+					response.Status.Code = http.StatusOK
+					return ctx
+				},
+			},
+			restrictHandler: func(ctx context.Context, _ *Response, _ *http.Request, _ httprouter.Params) (context.Context, bool) {
+				return ctx, true
+			},
+			expectedStatus:              200,
+			checkResponseOfEveryHandler: false,
+		},
+	}
+
+	// run all tests
+	for index, test := range tests {
+		// recorder and request to simulate test
+		recorder := httptest.NewRecorder()
+		request, err := http.NewRequest("POST", "", nil)
+
+		// build chain
+		handlerChain := RestrictedRequestChainContextHandlerWithResponseCheck(test.checkResponseOfEveryHandler, test.restrictHandler, responseHandler, test.handler...)
+		handlerChain(recorder, request, nil)
+
+		// check result
+		var responseBody map[string]interface{}
+		json.Unmarshal([]byte(recorder.Body.String()), &responseBody)
+		if err != nil || int(responseBody["status"].(float64)) != test.expectedStatus {
+			t.Errorf("Test %v failed: expected data is not equals response.status.code; expected: %v; response: %v", index, test.expectedStatus, responseBody["status"])
 		}
 	}
 }
