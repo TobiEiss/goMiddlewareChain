@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -61,4 +62,10 @@ func JSONResponseHandler(response *goMiddlewareChain.Response, writer http.Respo
 	}
 
 	fmt.Fprintf(writer, "%s", responseByte)
+}
+
+// JSONResponseContextHandler wrap the response in a standard json structure
+func JSONResponseContextHandler(ctx context.Context, response *goMiddlewareChain.Response, writer http.ResponseWriter, request *http.Request, params httprouter.Params) context.Context {
+	JSONResponseHandler(response, writer, request, params)
+	return ctx
 }
