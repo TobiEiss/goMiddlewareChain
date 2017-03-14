@@ -30,3 +30,6 @@ type ResponseHandler func(*Response, http.ResponseWriter, *http.Request, httprou
 
 // ContextHandler a handler with the go-lang-context
 type ContextHandler func(context.Context, *Response, *http.Request, httprouter.Params) context.Context
+
+// RestrictContextHandler restrict handler for contextHandler
+type RestrictContextHandler func(context.Context, *Response, *http.Request, httprouter.Params) (context.Context, bool)

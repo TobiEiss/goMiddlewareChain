@@ -22,6 +22,24 @@ func RequestChainHandler(responseHandler ResponseHandler, handlers ...Handler) h
 	})
 }
 
+// RequestChainContextHandler chains all handler
+func RequestChainContextHandler(responseHandler ResponseHandler, handlers ...ContextHandler) httprouter.Handle {
+	return httprouter.Handle(func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+		payload := Response{}
+		rootContext := context.Background()
+
+		// iterate all handlers
+		var runningContext context.Context
+		runningContext = rootContext
+		for _, handler := range handlers {
+			runningContext = handler(runningContext, &payload, request, params)
+		}
+
+		// pass responseHandler
+		responseHandler(&payload, writer, request, params)
+	})
+}
+
 // RestrictedRequestChainHandler need a RestrictHandler.
 // A RestrictHandler returns bool if call is allowed.
 func RestrictedRequestChainHandler(restrictHandler RestrictHandler, responseHandler ResponseHandler, handlers ...Handler) httprouter.Handle {
@@ -46,20 +64,29 @@ func RestrictedRequestChainHandler(restrictHandler RestrictHandler, responseHand
 	})
 }
 
-// RequestChainContextHandler chains all handler
-func RequestChainContextHandler(responseHandler ResponseHandler, handlers ...ContextHandler) httprouter.Handle {
+// RestrictedRequestChainContextHandler need a RestrictHandler.
+// A RestrictHandler returns bool if call is allowed.
+func RestrictedRequestChainContextHandler(restrictHandler RestrictContextHandler, responseHandler ResponseHandler, handlers ...ContextHandler) httprouter.Handle {
 	return httprouter.Handle(func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		payload := Response{}
 		rootContext := context.Background()
-
-		// iterate all handlers
 		var runningContext context.Context
-		runningContext = rootContext
-		for _, handler := range handlers {
-			runningContext = handler(runningContext, &payload, request, params)
+
+		// check restriction
+		runningContext, allowed := restrictHandler(rootContext, &payload, request, params)
+
+		if allowed {
+			// iterate all handlers
+			runningContext = rootContext
+			for _, handler := range handlers {
+				runningContext = handler(runningContext, &payload, request, params)
+			}
+		} else if payload.Status.Code == 0 {
+			payload.Status.Code = http.StatusUnauthorized
+			payload.Status.Message = "failed by passing restrictHandler"
 		}
 
-		// pass responseHandler
+		// pass ResponseHandler
 		responseHandler(&payload, writer, request, params)
 	})
 }
