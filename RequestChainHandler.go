@@ -9,12 +9,20 @@ import (
 
 // RequestChainHandler chains all handler
 func RequestChainHandler(responseHandler ResponseHandler, handlers ...Handler) httprouter.Handle {
+	return RequestChainHandlerWithResponseCheck(false, responseHandler, handlers...)
+}
+
+// RequestChainHandlerWithResponseCheck chains all handler and check every response
+func RequestChainHandlerWithResponseCheck(checkResponseOfEveryHandler bool, responseHandler ResponseHandler, handlers ...Handler) httprouter.Handle {
 	return httprouter.Handle(func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		payload := Response{}
 
 		// iterate all handlers
 		for _, handler := range handlers {
 			handler(&payload, request, params)
+			if checkResponseOfEveryHandler && (payload.Status.Code != http.StatusOK && payload.Status.Code != 0) {
+				break
+			}
 		}
 
 		// pass responseHandler
