@@ -33,3 +33,8 @@ type ContextHandler func(context.Context, *Response, *http.Request, httprouter.P
 
 // RestrictContextHandler restrict handler for contextHandler
 type RestrictContextHandler func(context.Context, *Response, *http.Request, httprouter.Params) (context.Context, bool)
+
+// ContextKey to map ContextValues
+type ContextKey struct {
+	Key string
+}
